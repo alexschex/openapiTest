@@ -1,0 +1,97 @@
+openapi: 3.0.0
+info:
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/)
+    or HTML.
+  title: Sample API
+  version: 0.1.9
+servers:
+- description: Optional server description, e.g. Main (production) server
+  url: http://api.example.com/v1
+- description: Optional server description, e.g. Internal staging server for testing
+  url: http://staging-api.example.com
+paths:
+  /pet/{name}:
+    get:
+      parameters:
+      - description: Name of a pet
+        example: Steve
+        explode: false
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+          description: OK
+components:
+  schemas:
+    Pet:
+      anyOf:
+      - $ref: '#/components/schemas/BasicPet'
+      - $ref: '#/components/schemas/Dog'
+      - $ref: '#/components/schemas/Cat'
+      description: A pet you have
+      discriminator:
+        mapping:
+          Lizard: '#/components/schemas/BasicPet'
+          Unicorn: '#/components/schemas/BasicPet'
+          Dog: '#/components/schemas/Dog'
+          Cat: '#/components/schemas/Cat'
+        propertyName: type
+      title: A pet
+    PetBase:
+      description: The basic information common amongst all pets
+      properties:
+        name:
+          description: name of the pet
+          type: string
+        type:
+          $ref: '#/components/schemas/PetTypes'
+        age:
+          description: age of the pet
+          type: integer
+      required:
+      - age
+      - name
+      - type
+      title: Base Pet Information
+    PetTypes:
+      description: Type of pet
+      enum:
+      - Lizard
+      - Unicorn
+      - Dog
+      - Cat
+      type: string
+    BasicPet:
+      allOf:
+      - $ref: '#/components/schemas/PetBase'
+      title: Any other pet
+    Dog:
+      allOf:
+      - $ref: '#/components/schemas/PetBase'
+      - $ref: '#/components/schemas/Dog_allOf'
+    Cat:
+      allOf:
+      - $ref: '#/components/schemas/PetBase'
+      - $ref: '#/components/schemas/Cat_allOf'
+    Dog_allOf:
+      properties:
+        bark:
+          type: boolean
+      required:
+      - bark
+      type: object
+    Cat_allOf:
+      properties:
+        hunts:
+          type: boolean
+      required:
+      - hunts
+      type: object
